@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Helmet 3D</title>
+  <title>HelmX 3D</title>
   <style>
     html, body {
       margin: 0;
@@ -27,6 +27,8 @@
   <script src="https://unpkg.com/three@0.161.0/examples/js/loaders/GLTFLoader.js"></script>
 
   <script>
+    console.log("Init script start");
+
     const canvas = document.getElementById("webgl");
 
     const renderer = new THREE.WebGLRenderer({
@@ -62,15 +64,25 @@
     window.addEventListener("resize", resize);
     resize();
 
+    // ТЕСТОВЫЙ КУБ, чтобы точно что-то было видно
+    const cubeGeo = new THREE.BoxGeometry(1, 1, 1);
+    const cubeMat = new THREE.MeshStandardMaterial({ color: 0x00ff99 });
+    const cube = new THREE.Mesh(cubeGeo, cubeMat);
+    cube.position.set(-2, 0, 0); // чуть в сторону, чтобы не мешал шлему
+    scene.add(cube);
+
     let model = null;
 
     const loader = new THREE.GLTFLoader();
     loader.load(
-      "https://github.com/Rigininio/3d-models-Helmet-/raw/refs/heads/main/%D0%9A%D0%B0%D1%81%D0%BA%D0%B0.glb",
+      // ВАЖНО: используем raw.githubusercontent.com и новое имя файла HelmX.glb
+      "https://raw.githubusercontent.com/Rigininio/3d-models-Helmet-/main/HelmX.glb",
       (gltf) => {
+        console.log("GLB loaded OK");
         model = gltf.scene;
         scene.add(model);
 
+        // Центруем модель и подгоняем камеру под размер
         const box = new THREE.Box3().setFromObject(model);
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
@@ -83,17 +95,23 @@
         const fov = camera.fov * (Math.PI / 180);
         let cameraZ = (maxDim / 2) / Math.tan(fov / 2);
         cameraZ *= 1.5;
+
         camera.position.set(0, 0, cameraZ);
         camera.near = cameraZ / 100;
         camera.far = cameraZ * 100;
         camera.updateProjectionMatrix();
       },
       undefined,
-      (err) => console.error("GLB load error", err)
+      (err) => {
+        console.error("GLB load error", err);
+      }
     );
 
     function animate() {
       requestAnimationFrame(animate);
+      cube.rotation.x += 0.01;
+      cube.rotation.y += 0.01;
+
       if (model) {
         model.rotation.y += 0.01;
       }
